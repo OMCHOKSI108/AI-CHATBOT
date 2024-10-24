@@ -3,8 +3,9 @@ import openai
 
 
 
-# Set your OpenAI API key here
-openai.api_key = "sk-RtIcDj3xQKXsHdjHs_-7l8w0Q5PIlrPFjwtTwfgFX2T3BlbkFJP72uTDRMEnMAnU8rMCP2iPmS3I_if6Sbx_Fp627TUA"
+
+# Set your OpenAI API key from secrets
+openai.api_key = st.secrets["openai"]["sk-RtIcDj3xQKXsHdjHs_-7l8w0Q5PIlrPFjwtTwfgFX2T3BlbkFJP72uTDRMEnMAnU8rMCP2iPmS3I_if6Sbx_Fp627TUA"]
 
 # Streamlit app title
 st.set_page_config(page_title="Technical Education Chatbot", page_icon=":robot_face:", layout="centered")
