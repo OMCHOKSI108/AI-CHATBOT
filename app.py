@@ -8,26 +8,23 @@ df = pd.read_excel('DATASET01.xlsx')
 # Streamlit application title
 st.title("Technical Education Chatbot")
 
-# Step 2: Function to find the closest matching response
-def get_response(user_input):
-    # Split user input into words for substring matching
-    user_input_words = user_input.lower().split()
+# Initialize session state to hold the conversation history
+if 'conversation' not in st.session_state:
+    st.session_state.conversation = []
 
-    # List to hold matching responses
+# Function to find the closest matching response
+def get_response(user_input):
+    user_input_words = user_input.lower().split()
     matching_responses = []
 
-    # Check each row in the dataset
     for index, row in df.iterrows():
         patterns = row['patterns'].split(',')  # Assuming patterns are comma-separated
         tag = row['tag']
 
-        # Check if any word from the user input matches any pattern
         for pattern in patterns:
-            # Convert the pattern to lowercase for case-insensitive matching
             if all(word in pattern.lower() for word in user_input_words):
                 matching_responses.extend(row['responses'].split(','))  # Add matching responses to the list
 
-    # If there are matching responses, return one at random
     if matching_responses:
         return random.choice(matching_responses)
 
@@ -39,4 +36,10 @@ user_input = st.text_input("Ask me anything about technical education:")
 # Step 4: Generate a response when the user submits a question
 if user_input:
     response = get_response(user_input)
-    st.write("**Bot:**", response)
+    # Store the user input and response in the session state
+    st.session_state.conversation.append({"user": user_input, "bot": response})
+
+# Display the conversation history
+for chat in st.session_state.conversation:
+    st.write(f"**You:** {chat['user']}")
+    st.write(f"**Bot:** {chat['bot']}")
