@@ -3,6 +3,7 @@ import pandas as pd
 import random
 
 # Step 1: Load the dataset from the Excel file
+# Make sure that 'DATASET01.xlsx' is in the same directory as this script
 df = pd.read_excel('DATASET01.xlsx')
 
 # Streamlit application title
