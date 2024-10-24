@@ -1,42 +1,38 @@
 import streamlit as st
-import pandas as pd
-import random
+import openai
 
-# Load the dataset from the Excel file
-df = pd.read_excel('DATASET01.xlsx')
+# Set your OpenAI API key here
+openai.api_key = "sk-RtIcDj3xQKXsHdjHs_-7l8w0Q5PIlrPFjwtTwfgFX2T3BlbkFJP72uTDRMEnMAnU8rMCP2iPmS3I_if6Sbx_Fp627TUA"
 
-# Streamlit application title
-st.title("Technical Education Chatbot")
+# Streamlit app title
+st.title("Technical Education Chatbot with OpenAI")
 
-# Initialize session state to hold the conversation history
+# Initialize session state to store the conversation history
 if 'conversation' not in st.session_state:
     st.session_state.conversation = []
 
-# Function to find the closest matching response
-def get_response(user_input):
-    user_input_words = user_input.lower().split()
-    matching_responses = []
+# Function to get response from OpenAI
+def get_openai_response(prompt):
+    try:
+        response = openai.Completion.create(
+            engine="text-davinci-003",  # You can also use "gpt-4" if available in your API
+            prompt=prompt,
+            max_tokens=150,
+            temperature=0.7,
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-    for index, row in df.iterrows():
-        patterns = row['patterns'].split(',')  # Assuming patterns are comma-separated
-        tag = row['tag']
-
-        for pattern in patterns:
-            if all(word in pattern.lower() for word in user_input_words):
-                matching_responses.extend(row['responses'].split(','))  # Add matching responses to the list
-
-    if matching_responses:
-        return random.choice(matching_responses)
-
-    return "Sorry, I don't have the answer to that question."
-
-# Step 3: Create a text input for user queries
+# Create a text input for user queries
 user_input = st.text_input("Ask me anything about technical education:")
 
-# Step 4: Generate a response when the user submits a question
+# When the user submits a question
 if user_input:
-    response = get_response(user_input)
-    # Store the user input and response in the session state
+    # Call the OpenAI API to get a response
+    response = get_openai_response(user_input)
+    
+    # Append user input and response to conversation history
     st.session_state.conversation.append({"user": user_input, "bot": response})
 
 # Display the conversation history
