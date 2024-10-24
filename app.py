@@ -1,38 +1,28 @@
-import streamlit as st
-import requests
+from flask import Flask, request, jsonify
+import pandas as pd
+import random
 
-# Title of the app
-st.title("Technical Education Chatbot")
+app = Flask(__name__)
 
-# Chat history
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
+# Step 1: Load the dataset from the Excel file
+df = pd.read_excel('DATASET01.xlsx')
 
-# Function to handle sending messages
-def send_message(user_input):
-    # Display user message
-    st.session_state.chat_history.append({"message": user_input, "is_user": True})
-    
-    
-    # Send the user message to the chatbot backend
-    # Replace 'http://localhost:5000/get' with your actual backend URL if deployed
-    
-    response = requests.get(f"https://ai-chatbot-technical-23aiml010.streamlit.app/{user_input}")
-    bot_reply = response.text
-    
-    # Display bot reply
-    st.session_state.chat_history.append({"message": bot_reply, "is_user": False})
+# Step 2: Function to find the closest matching response
+def get_response(user_input):
+    for index, row in df.iterrows():
+        patterns = row['patterns'].split(',')  # Assuming patterns are comma-separated
+        for pattern in patterns:
+            if pattern.strip().lower() in user_input.lower():
+                return random.choice(row['responses'].split(','))  # Randomly choose a response
+    return "Sorry, I don't have the answer to that question."
 
-# User input text box
-user_input = st.text_input("Type your message...", "")
-if st.button("Send"):
-    if user_input:
-        send_message(user_input)
-        st.text_input("Type your message...", "", key='new_input')
+# Step 3: Route for chatbot interaction
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_input = data.get('message', '')
+    response = get_response(user_input)
+    return jsonify({'response': response})
 
-# Display chat history
-for chat in st.session_state.chat_history:
-    if chat["is_user"]:
-        st.markdown(f"You: {chat['message']}")
-    else:
-        st.markdown(f"Bot: {chat['message']}")
+if __name__ == '__main__':
+    app.run(debug=True)
