@@ -15,7 +15,8 @@ def send_message(user_input):
     
     # Send the user message to the chatbot backend
     # Replace 'http://localhost:5000/get' with your actual backend URL if deployed
-    response = requests.get(f"http://127.0.0.1:5000/get?msg={user_input}")
+     response = requests.get(f"https://ai-chatbot-technical-23aiml010.streamlit.app/{user_input}")
+
     bot_reply = response.text
     
     # Display bot reply
