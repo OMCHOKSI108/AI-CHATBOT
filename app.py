@@ -2,33 +2,36 @@ import streamlit as st
 import pandas as pd
 import random
 
-# Step 1: Load the dataset from the Excel file
-# Make sure that 'DATASET01.xlsx' is in the same directory as this script
+# Load the dataset from the Excel file
 df = pd.read_excel('DATASET01.xlsx')
 
 # Streamlit application title
 st.title("Technical Education Chatbot")
 
 # Step 2: Function to find the closest matching response
-from fuzzywuzzy import process
-
-# Step 2: Function to find the closest matching response
 def get_response(user_input):
-    user_input = user_input.lower()
-    all_patterns = df['patterns'].str.cat(sep=',').split(',')  # Get all patterns into a list
+    # Split user input into words for substring matching
+    user_input_words = user_input.lower().split()
 
-    # Use fuzzy matching to find the best match
-    best_match, _ = process.extractOne(user_input, [p.strip().lower() for p in all_patterns])
+    # List to hold matching responses
+    matching_responses = []
 
-    # Check if the best match is a significant match (you can adjust the threshold)
-    if process.extractOne(user_input, [p.strip().lower() for p in all_patterns])[1] >= 75:  
-        # Find the corresponding row in the dataframe
-        row = df[df['patterns'].str.contains(best_match, case=False)]
-        if not row.empty:
-            return random.choice(row['responses'].values[0].split(','))  # Randomly choose a response
-    
+    # Check each row in the dataset
+    for index, row in df.iterrows():
+        patterns = row['patterns'].split(',')  # Assuming patterns are comma-separated
+        tag = row['tag']
+
+        # Check if any word from the user input matches any pattern
+        for pattern in patterns:
+            # Convert the pattern to lowercase for case-insensitive matching
+            if all(word in pattern.lower() for word in user_input_words):
+                matching_responses.extend(row['responses'].split(','))  # Add matching responses to the list
+
+    # If there are matching responses, return one at random
+    if matching_responses:
+        return random.choice(matching_responses)
+
     return "Sorry, I don't have the answer to that question."
-
 
 # Step 3: Create a text input for user queries
 user_input = st.text_input("Ask me anything about technical education:")
@@ -37,5 +40,3 @@ user_input = st.text_input("Ask me anything about technical education:")
 if user_input:
     response = get_response(user_input)
     st.write("**Bot:**", response)
-
-# Optional: To display more context or information, you can add more elements below
